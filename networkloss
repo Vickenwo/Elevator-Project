@@ -1,0 +1,10 @@
+
+Network loss 100%
+sudo iptables -A INPUT -p udp --dport 15877 -m statistic --mode random --probability 1 -j DROP
+sudo iptables -A INPUT -p udp --dport 15777 -m statistic --mode random --probability 1 -j DROP
+sudo iptables -A INPUT -p udp --dport 15647 -m statistic --mode random --probability 1 -j DROP
+
+Paket loss 20%
+sudo iptables -A INPUT -p udp --dport 15877 -m statistic --mode random --probability 0.2 -j DROP
+sudo iptables -A INPUT -p udp --dport 15777 -m statistic --mode random --probability 0.2 -j DROP
+sudo iptables -A INPUT -p udp --dport 15647 -m statistic --mode random --probability 0.2 -j DROP
