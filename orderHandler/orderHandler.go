@@ -71,9 +71,6 @@ func OrderHandler(id int, elevators *[config.NumberOfElevators]config.ElevatorSt
 					informCh.SendOrder <- recoverOrder
 				}
 			}
-		case obstruction := <-hardwareCh.DrvObstr:
-			fmt.Printf("Obstruction %+v\n", obstruction)
-			//Om det har gått x antall sekunder skal ordrene redistibueres
 		}
 	}
 }
