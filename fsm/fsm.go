@@ -112,7 +112,7 @@ func Fsm(id int, hardwareCh config.HardwareChannels, netCh config.NetworkChannel
 
 		case config.Executing:
 
-			//if order here
+	
 			for button := hardware.BT_HallUp; button <= hardware.BT_Cab; button++ {
 				if elevators[id].LocalQueue[elevators[id].Floor][button] {
 					executedOrder := config.ElevatorOrder{elevators[id].Floor, button, id, true}
@@ -135,7 +135,7 @@ func Fsm(id int, hardwareCh config.HardwareChannels, netCh config.NetworkChannel
 					}
 				}
 				informCh.SendState <- elevators[id]
-			//implement for obstruction?
+			
 			case <-timerCh.TimerDoorFinished:
 
 				hardware.SetDoorOpenLamp(false)
