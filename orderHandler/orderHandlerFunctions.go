@@ -57,8 +57,7 @@ func costFunction(id int, newOrder config.ElevatorOrder, elevators *[config.Numb
 			return -1
 		}
 
-		ordersAbove := CheckIfOrdersAbove(elevator)
-		ordersBelow := CheckIfOrdersBelow(elevator)
+		ordersAbove, ordersBelow, _ := CheckIfOrders(&elevator)
 		cost := 0
 		distance := newOrder.Floor - elevator.Floor
 		
@@ -158,6 +157,28 @@ func CheckIfOrdersHere(elevatorState config.ElevatorState) (ordersHere bool) {
 		}
 	}
 	return false
+}
+
+func CheckIfOrders(elevatorState *config.ElevatorState) (ordersAbove, ordersBelow, ordersHere bool) {
+	ordersAbove = false
+	ordersBelow = false
+	ordersHere = false
+
+	for floor := 0; floor < config.NumberOfFloors; floor++ {
+		for button := hardware.BT_HallUp; button <= hardware.BT_Cab; button++ {
+		
+			if floor > elevatorState.Floor && elevatorState.LocalQueue[floor][button] {
+				ordersAbove = true
+			}
+			if floor < elevatorState.Floor && elevatorState.LocalQueue[floor][button] {
+				ordersBelow = true
+			}
+			if floor == elevatorState.Floor && elevatorState.LocalQueue[floor][button] {
+				ordersHere = true
+			}
+		}
+	}
+	return ordersAbove, ordersBelow, ordersHere
 }
 
 func distributeOrder(id int, order config.ElevatorOrder, elevators *[config.NumberOfElevators]config.ElevatorState, availableElevators *[config.NumberOfElevators]bool, informCh config.InformChannels) {
