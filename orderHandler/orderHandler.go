@@ -1,7 +1,6 @@
 package orderHandler
 
 import (
-	"fmt"
 	"project-group11/config"
 	"project-group11/hardware"
 )
