@@ -38,7 +38,7 @@ func DeleteOrder(id int, executedOrder config.ElevatorOrder, elevators *[config.
 
 }
 
-
+// calculating the costs for each elevator for each order, based on weighting
 func costFunction(id int, newOrder config.ElevatorOrder, elevators *[config.NumberOfElevators]config.ElevatorState, availableElevators *[config.NumberOfElevators]bool) (lowestCostId int) {
 	if newOrder.Type == hardware.BT_Cab {
 		return id
@@ -46,13 +46,14 @@ func costFunction(id int, newOrder config.ElevatorOrder, elevators *[config.Numb
 	lowestCost := 1000
 	lowestCostId = id
 
-
+	
 	for currentId, elevator := range elevators {
+		// if elevator not available, go to next elevator
 		if !availableElevators[currentId] || elevator.State == config.Init {
 			continue
 		}
 
-
+		// if order already exists on the floor
 		if elevator.LocalQueue[newOrder.Floor][newOrder.Type] {
 			return -1
 		}
@@ -60,7 +61,8 @@ func costFunction(id int, newOrder config.ElevatorOrder, elevators *[config.Numb
 		ordersAbove, ordersBelow, _ := CheckIfOrders(&elevator)
 		cost := 0
 		distance := newOrder.Floor - elevator.Floor
-
+		
+		
 		if distance == 0 {
 			if elevator.State != config.Moving {
 				return currentId
