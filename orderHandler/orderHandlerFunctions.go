@@ -1,7 +1,6 @@
 package orderHandler
 
 import (
-	"fmt"
 	"project-group11/config"
 	"project-group11/hardware"
 )
@@ -67,17 +66,21 @@ func costFunction(id int, newOrder config.ElevatorOrder, elevators *[config.Numb
 			if elevator.State != config.Moving {
 				return currentId
 			} else {
+				//Elevator moved away from order
 				cost += weightDirection
 			}
 		} else if distance > 0 {
+			//Elevator is above order must move up
 			if newOrder.Type == hardware.BT_HallDown && ordersAbove {
 				cost += weightDirection
 			}
+			//Check if orders between
 			for floor := elevator.Floor + 1; floor < newOrder.Floor; floor++ {
 				if elevator.LocalQueue[floor][hardware.BT_HallUp] || elevator.LocalQueue[floor][hardware.BT_Cab] {
 					cost += weightOrders
 				}
 			}
+			//Check if right direction, if not add weight
 			if elevator.Dir == hardware.MD_Down {
 				cost += weightDirection
 			} else if elevator.State == config.Moving {
@@ -85,9 +88,11 @@ func costFunction(id int, newOrder config.ElevatorOrder, elevators *[config.Numb
 			}
 
 		} else if distance < 0 {
+			//Elevator is below order, must move down
 			if newOrder.Type == hardware.BT_HallUp && ordersBelow {
 				cost += weightDirection
 			}
+			//Check if orders between
 			for floor := newOrder.Floor + 1; floor < elevator.Floor; floor++ {
 				if elevator.LocalQueue[floor][hardware.BT_HallDown] || elevator.LocalQueue[floor][hardware.BT_Cab] {
 					cost += weightOrders
@@ -95,23 +100,23 @@ func costFunction(id int, newOrder config.ElevatorOrder, elevators *[config.Numb
 			}
 
 			distance = -distance
+			//Check if right direction, if not add weight
 			if elevator.Dir == hardware.MD_Up {
 				cost += weightDirection
 			} else if elevator.State == config.Moving {
 				cost -= weightState
 			}
 		}
-
 		if elevator.State == config.Executing {
 			cost += weightState
 			if elevator.Obstructed {
-				cost += weightState
+				cost += 5 * weightState
 			}
 
 		}
 
 		cost += distance * weightDistance
-
+		//Check if this is the new lowest cost
 		if cost < lowestCost {
 			lowestCost = cost
 			lowestCostId = currentId
@@ -179,14 +184,11 @@ func CheckIfOrders(elevatorState *config.ElevatorState) (ordersAbove, ordersBelo
 func distributeOrder(id int, order config.ElevatorOrder, elevators *[config.NumberOfElevators]config.ElevatorState, availableElevators *[config.NumberOfElevators]bool, informCh config.InformChannels) {
 	lowestCostId := costFunction(id, order, elevators, availableElevators)
 
-	if lowestCostId == -1 {
-		fmt.Printf("Duplicated order\n")
-
-	} else if lowestCostId == id {
+	if lowestCostId == id {
 		order.DesignatedElevatorId = id
 		addOrder(id, order, elevators, informCh)
 
-	} else {
+	} else if lowestCostId != -1 {
 		order.DesignatedElevatorId = lowestCostId
 		addOrder(id, order, elevators, informCh)
 	}
