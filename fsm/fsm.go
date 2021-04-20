@@ -16,11 +16,6 @@ func Fsm(id int, hardwareCh config.HardwareChannels, netCh config.NetworkChannel
 
 	newDirection = hardware.MD_Down
 
-	drv_stop := make(chan bool)
-
-	go hardware.PollStopButton(drv_stop)
-
-
 	hardware.SetMotorDirection(newDirection)
 
 	for floor := 0; floor < config.NumberOfFloors; floor++ {
@@ -35,6 +30,7 @@ func Fsm(id int, hardwareCh config.HardwareChannels, netCh config.NetworkChannel
 	for {
 		switch elevators[id].State {
 		case config.Init:
+			//Move to closest floor below the elevator, if not on floor
 			elevators[id].Floor = <-hardwareCh.DrvFloors
 			hardware.SetFloorIndicator(elevators[id].Floor)
 
@@ -112,7 +108,7 @@ func Fsm(id int, hardwareCh config.HardwareChannels, netCh config.NetworkChannel
 
 		case config.Executing:
 
-	
+			//Delete the executed order amd inform others
 			for button := hardware.BT_HallUp; button <= hardware.BT_Cab; button++ {
 				if elevators[id].LocalQueue[elevators[id].Floor][button] {
 					executedOrder := config.ElevatorOrder{elevators[id].Floor, button, id, true}
@@ -125,7 +121,7 @@ func Fsm(id int, hardwareCh config.HardwareChannels, netCh config.NetworkChannel
 			select {
 
 			case <-informCh.OrderUpdate:
-
+				
 				for button := hardware.BT_HallUp; button <= hardware.BT_Cab; button++ {
 					if elevators[id].LocalQueue[elevators[id].Floor][button] {
 						if !elevators[id].Obstructed {
@@ -135,7 +131,7 @@ func Fsm(id int, hardwareCh config.HardwareChannels, netCh config.NetworkChannel
 					}
 				}
 				informCh.SendState <- elevators[id]
-			
+			//Turn of lamp and switch state after executing
 			case <-timerCh.TimerDoorFinished:
 
 				hardware.SetDoorOpenLamp(false)
@@ -156,6 +152,7 @@ func Fsm(id int, hardwareCh config.HardwareChannels, netCh config.NetworkChannel
 			}
 			
 		case config.SystemFailure:
+			//If Mechanical Error has stopped, get the system back on track
 			select {
 			case <- informCh.OrderUpdate:
 			case elevators[id].Floor = <-hardwareCh.DrvFloors:
