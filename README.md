@@ -25,7 +25,7 @@ The Finite State Machine module concerns the different states in the system, `In
 Contains delivered code related to hardware in the system. 
 
 ### Network
-This module contains delivered code with functionality for connecting, broadcasting and receiving messages over the network. In addition, we made functions for monitoring peers and sending messages over the network based on informchannels in [network.go](network/network.go). The network communication is based on UDP, with peer to peer communication, as illustrated in [the design review](Design review presentation.pdf), which was used as a base for this project.
+This module contains delivered code with functionality for connecting, broadcasting and receiving messages over the network. In addition, we made functions for monitoring peers and sending messages over the network based on informchannels in [network.go](network/network.go). The network communication is based on UDP, with peer to peer communication.
 
 
 ### Order Handler
